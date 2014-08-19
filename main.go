@@ -25,8 +25,10 @@
 package mailer
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"net/http"
 	"net/smtp"
 	"os"
 	"strconv"
@@ -60,6 +62,7 @@ type Message struct {
 	To      []string
 	Subject string
 	Content []byte
+	Headers http.Header
 }
 
 // Creates a new mailer and a message queue.
@@ -138,7 +141,7 @@ func (self *Mailer) Send(message Message) (err error) {
 
 	// TODO: Add support for headers besides Subject, maybe we could use
 	// http.Header?
-	content = []byte(fmt.Sprintf("Subject: %s\r\n\r\n", message.Subject))
+	content = []byte(fmt.Sprintf("Subject: %s\n%s\r\n\r\n", message.Subject, message.getHeaders()))
 	content = append(content, message.Content...)
 
 	err = smtp.SendMail(
@@ -150,4 +153,11 @@ func (self *Mailer) Send(message Message) (err error) {
 	)
 
 	return err
+}
+
+func (self *Message) getHeaders() []byte {
+	var buf bytes.Buffer
+	self.Headers.Write(&buf)
+
+	return buf.Bytes()
 }
