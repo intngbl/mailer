@@ -25,6 +25,7 @@
 package mailer
 
 import (
+	"net/http"
 	"testing"
 	"time"
 )
@@ -32,6 +33,7 @@ import (
 func TestSendMail(t *testing.T) {
 	var err error
 	var m *Mailer
+	var headers http.Header
 
 	m, err = NewMailer()
 
@@ -53,6 +55,21 @@ func TestSendMail(t *testing.T) {
 		Subject: "Queued message",
 		To:      []string{"jose.carlos+spam@intangible.mx"},
 		Content: []byte("E-mail content."),
+	})
+
+	if err != nil {
+		t.Fatalf("Error: %s\n", err.Error())
+	}
+
+	headers = make(http.Header)
+	headers.Add(`MIME-version`, `1.0`)
+	headers.Add(`Content-type`, `text/html; charset="UTF-8"`)
+
+	err = m.Send(Message{
+		Subject: "HTML message",
+		To:      []string{"jose.carlos+spam@intangible.mx"},
+		Content: []byte("<html><body><h1>Rich content</h1></body></html>"),
+		Headers: headers,
 	})
 
 	if err != nil {
