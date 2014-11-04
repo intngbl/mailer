@@ -45,6 +45,7 @@ const (
 	envUsername  = `SMTP_USERNAME`
 	envPassword  = `SMTP_PASSWORD`
 	envQueueName = `MAIL_QUEUE`
+	envFrom      = `SMTP_FROM`
 )
 
 var sleepTime = time.Millisecond * 500
@@ -73,12 +74,16 @@ func NewMailer() (self *Mailer, err error) {
 	self.Port, _ = strconv.Atoi(os.Getenv(envPort))
 	self.Username = os.Getenv(envUsername)
 	self.Password = os.Getenv(envPassword)
+	self.From = os.Getenv(envFrom)
 
 	if self.Host == "" {
 		self.Host = defaultHost
 	}
 	if self.Port == 0 {
 		self.Port = defaultPort
+	}
+	if self.From == `` {
+		self.From = defaultFrom
 	}
 
 	queueName := os.Getenv(envQueueName)
